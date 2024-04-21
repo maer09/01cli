@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use anyhow::Result;
 
-use crate::opts::OutputFormat;
+use crate::cli::csv::OutputFormat;
 
 #[derive(Debug, Deserialize, Serialize)]
 #[serde(rename_all = "PascalCase")]
@@ -18,6 +18,7 @@ struct Player {
     #[serde(rename = "Kit Number")]
     kit: u8,
 }
+
 pub fn process_csv(input: &str, output: String, format: OutputFormat) -> Result<()> {
     let mut reader = Reader::from_path(input).unwrap();
     let mut ret = Vec::with_capacity(128);
