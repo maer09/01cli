@@ -1,10 +1,9 @@
-use crate::cli::Base64Format;
+use crate::{cli::Base64Format, get_reader};
 use base64::{
     engine::general_purpose::{STANDARD, URL_SAFE_NO_PAD},
     Engine as _,
 };
-use std::{fs::File, io::Read};
-use anyhow::Result;
+use std::io::Read;
 
 pub fn process_encode(input: &str, format: Base64Format) -> anyhow::Result<()> {
     let mut reader = get_reader(input)?;
@@ -19,18 +18,6 @@ pub fn process_encode(input: &str, format: Base64Format) -> anyhow::Result<()> {
     println!("{}", encoded);
 
     Ok(())
-}
-
-fn get_reader(input: &str) -> Result<Box<dyn Read>> {
-    // 用Box和syn还有Trait消除多种类型
-    let reader: Box<dyn Read> = if input == "-" {
-        // windows命令行下下按ctrl+z输入EOF才能终止输入
-        Box::new(std::io::stdin())
-    } else {
-        Box::new(File::open(input)?)
-    };
-
-    Ok(reader)
 }
 
 pub fn process_decode(input: &str, format: Base64Format) -> anyhow::Result<()> {
