@@ -1,8 +1,8 @@
-use std::{fmt, str::FromStr};
+use std::{fmt, path::PathBuf, str::FromStr};
 
 use clap::Parser;
 
-use super::verify_file;
+use super::{verify_file, verify_path};
 
 #[derive(Debug, Parser)]
 pub enum TextSubCommand {
@@ -11,6 +11,9 @@ pub enum TextSubCommand {
 
     #[command(about = "Verify a message with a private key")]
     Verify(TextVerifyOpts),
+
+    #[command(about = "Generate a new key")]
+    Generate(TextKeyGenerateOpts),
 }
 
 #[derive(Debug, Parser)]
@@ -40,6 +43,14 @@ pub struct TextVerifyOpts {
     pub format: TextSignFormat,
 }
 
+#[derive(Debug, Parser)]
+pub struct TextKeyGenerateOpts {
+    #[arg(short, long, default_value = "blake3", value_parser = parse_format)]
+    pub format: TextSignFormat,
+    #[arg(short, long, value_parser = verify_path, default_value = "-")]
+    pub output: PathBuf,
+}
+
 #[derive(Debug, Clone, Copy)]
 pub enum TextSignFormat {
     Blake3,
@@ -57,7 +68,7 @@ impl FromStr for TextSignFormat {
         match s {
             "blake3" => Ok(TextSignFormat::Blake3),
             "ed25519" => Ok(TextSignFormat::Ed25519),
-            _ => Err(anyhow::anyhow!("Invalid text sign format"))
+            _ => Err(anyhow::anyhow!("Invalid text sign format")),
         }
     }
 }
@@ -66,13 +77,13 @@ impl From<TextSignFormat> for &'static str {
     fn from(format: TextSignFormat) -> Self {
         match format {
             TextSignFormat::Blake3 => "blake3",
-            TextSignFormat::Ed25519 => "ed25519"
+            TextSignFormat::Ed25519 => "ed25519",
         }
     }
 }
 
 impl fmt::Display for TextSignFormat {
-    fn fmt(&self, f:&mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", Into::<&'static str>::into(*self))
     }
 }
